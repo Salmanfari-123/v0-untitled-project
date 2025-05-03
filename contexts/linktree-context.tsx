@@ -142,9 +142,17 @@ const LinkTreeContext = createContext<LinkTreeContextType | undefined>(undefined
 export const LinkTreeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<LinkTreeState>(defaultState)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Load state from localStorage on component mount
   useEffect(() => {
+    if (!isMounted) return
+
     const savedState = localStorage.getItem("linkTreeState")
     if (savedState) {
       try {
@@ -158,14 +166,14 @@ export const LinkTreeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
     setIsInitialized(true)
-  }, [])
+  }, [isMounted])
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && isMounted) {
       localStorage.setItem("linkTreeState", JSON.stringify(state))
     }
-  }, [state, isInitialized])
+  }, [state, isInitialized, isMounted])
 
   const isAuthenticated = () => {
     return state.user.isLoggedIn

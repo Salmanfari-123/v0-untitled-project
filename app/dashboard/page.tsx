@@ -9,13 +9,20 @@ import { AtSign, Copy, ExternalLink, Link, Plus, Users } from "lucide-react"
 import NextLink from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
   const { state } = useLinkTree()
   const router = useRouter()
+  const [baseUrl, setBaseUrl] = useState("")
+
+  // Set the base URL only on the client side
+  useEffect(() => {
+    setBaseUrl(window.location.origin)
+  }, [])
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/preview/${state.user.username}`
+    const url = `${baseUrl}/preview/${state.user.username}`
     navigator.clipboard.writeText(url)
     toast.success("Link copied to clipboard")
   }
@@ -89,9 +96,9 @@ export default function DashboardPage() {
             <CardContent>
               <div className="flex items-center gap-2">
                 <div className="flex-1 p-3 bg-gray-100 rounded-md text-gray-700 break-all">
-                  {window.location.origin}/preview/{state.user.username}
+                  {baseUrl ? `${baseUrl}/preview/${state.user.username}` : `Loading URL...`}
                 </div>
-                <Button variant="ghost" size="icon" onClick={handleCopyLink}>
+                <Button variant="ghost" size="icon" onClick={handleCopyLink} disabled={!baseUrl}>
                   <Copy className="h-5 w-5" />
                 </Button>
                 <NextLink href={`/preview/${state.user.username}`} target="_blank">

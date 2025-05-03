@@ -15,8 +15,16 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated } = useLinkTree()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
+    if (!isMounted) return
+
     // Short timeout to prevent flash of loading state if already authenticated
     const timer = setTimeout(() => {
       if (!isAuthenticated()) {
@@ -27,7 +35,12 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [router, isAuthenticated])
+  }, [router, isAuthenticated, isMounted])
+
+  // Don't render anything during server-side rendering
+  if (!isMounted) {
+    return null
+  }
 
   // If loading or not authenticated, show loading state
   if (isLoading || !isAuthenticated()) {
