@@ -2,10 +2,12 @@
 
 import DashboardLayout from "@/components/layouts/dashboard-layout"
 import PreviewPanel from "@/components/preview/preview-panel"
+import { SocialMediaModal } from "@/components/socials/social-media-modal"
+import { PlatformIcon } from "@/components/socials/platform-icon"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLinkTree } from "@/contexts/linktree-context"
-import { AtSign, Copy, ExternalLink, Link, Plus, Users } from "lucide-react"
+import { Copy, ExternalLink, LinkIcon, Plus, Users } from "lucide-react"
 import NextLink from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -15,6 +17,7 @@ export default function DashboardPage() {
   const { state } = useLinkTree()
   const router = useRouter()
   const [baseUrl, setBaseUrl] = useState("")
+  const [socialModalOpen, setSocialModalOpen] = useState(false)
 
   // Set the base URL only on the client side
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <Link className="h-6 w-6 mr-2 text-emerald-500" />
+                    <LinkIcon className="h-6 w-6 mr-2 text-emerald-500" />
                     <span className="text-2xl font-bold">{state.links.length}</span>
                   </div>
                   <Button size="sm" onClick={() => router.push("/dashboard/links")}>
@@ -62,11 +65,17 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <AtSign className="h-6 w-6 mr-2 text-emerald-500" />
+                    <div className="h-6 w-6 mr-2 text-emerald-500">
+                      {state.socials.length > 0 ? (
+                        <PlatformIcon platform={state.socials[0].platform} size="lg" />
+                      ) : (
+                        <PlatformIcon platform="instagram" size="lg" />
+                      )}
+                    </div>
                     <span className="text-2xl font-bold">{state.socials.length}</span>
                   </div>
-                  <Button size="sm" onClick={() => router.push("/dashboard/socials")}>
-                    <Plus className="h-4 w-4 mr-1" /> Add
+                  <Button size="sm" onClick={() => setSocialModalOpen(true)}>
+                    <Plus className="h-4 w-4 mr-1" /> Manage
                   </Button>
                 </div>
               </CardContent>
@@ -95,7 +104,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <div className="flex-1 p-3 bg-gray-100 rounded-md text-gray-700 break-all">
+                <div className="flex-1 p-3 bg-gray-100 dark:bg-gray-800 rounded-md text-gray-700 dark:text-gray-300 break-all">
                   {baseUrl ? `${baseUrl}/preview/${state.user.username}` : `Loading URL...`}
                 </div>
                 <Button variant="ghost" size="icon" onClick={handleCopyLink} disabled={!baseUrl}>
@@ -109,11 +118,11 @@ export default function DashboardPage() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button variant="outline" className="text-sm" onClick={() => router.push("/dashboard/links")}>
-                  <Link className="h-4 w-4 mr-2" />
+                  <LinkIcon className="h-4 w-4 mr-2" />
                   Manage Links
                 </Button>
-                <Button variant="outline" className="text-sm" onClick={() => router.push("/dashboard/socials")}>
-                  <AtSign className="h-4 w-4 mr-2" />
+                <Button variant="outline" className="text-sm" onClick={() => setSocialModalOpen(true)}>
+                  <PlatformIcon platform="instagram" size="sm" className="mr-2" />
                   Social Media
                 </Button>
                 <Button variant="outline" className="text-sm" onClick={() => router.push("/dashboard/profile")}>
@@ -130,6 +139,9 @@ export default function DashboardPage() {
           <PreviewPanel />
         </div>
       </div>
+
+      {/* Social Media Modal */}
+      <SocialMediaModal open={socialModalOpen} onOpenChange={setSocialModalOpen} />
     </DashboardLayout>
   )
 }
